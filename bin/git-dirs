@@ -1,0 +1,12 @@
+#!/bin/bash
+
+find . -maxdepth 1 -type d | while read d; do 
+ pushd $d >> /dev/null; 
+ if [ -d ".git" ]; then 
+  pwd
+  eval "$@"
+  echo ""
+ fi; 
+ popd >> /dev/null; 
+done;
+

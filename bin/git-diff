@@ -1,0 +1,4 @@
+#!/bin/bash
+
+git diff -b $1 --name-only | grep -Eiv '(target|classes|mem.*|.classpath|.metadata|.mymetadata|.project|.settings)' | xargs git diff -b $1 --
+

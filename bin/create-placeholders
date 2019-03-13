@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -e
+
+
+ARGS="$@"
+if [ "$ARGS" == "" ]; then
+    echo ""
+    echo "WARN : NO ARGUMENTS FOUND."
+    echo ""
+    echo "syntax:"
+    echo "========================================="
+    echo "$(basename $0) [directory names]"
+    echo ""
+    echo "examples :"
+    echo "$(basename $0) dir1"
+    echo "$(basename $0) dir1 dir2"
+    echo ""
+    exit 0;
+fi;
+
+find "$@" -type d -empty | while read d; do touch "$d/PLACEHOLDER.txt"; done;

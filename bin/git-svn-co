@@ -1,0 +1,33 @@
+#!/bin/bash
+
+set -e
+
+COMMITS="5"
+if [ "$1" == "" ]; then
+    echo ""
+    echo "WARN : NO ARGUMENTS FOUND."
+    echo ""
+    echo "syntax:"
+    echo "========================================="
+    echo "$(basename $0) svn-url [number of revisions]"
+    echo ""
+    echo "examplesi (will pull trunk, tags, and branches from revision n):"
+    echo "$(basename $0) https://svn.something.com/repo/module      <-- get's the last $COMMITS commits (by default)"
+    echo "$(basename $0) https://svn.something.com/repo/module 15   <-- get's the last 15 commits"
+    echo ""
+    exit 0;
+fi;
+
+if [ "$2" != "" ]; then
+    COMMITS="$2"
+fi;
+
+
+echo "determining revision number from $COMMITS commits back."
+SVN_MODULE=$1
+REV="$(svn log -l $COMMITS $SVN_MODULE | grep -E '^r' | tail -n 1 | sed 's/^r\([0-9]*\) | .*$/\1/g')"
+
+echo "cloning from revision $REV"
+echo "from repo module $SVN_MODULE"
+
+git svn clone -s -r$REV:HEAD $SVN_MODULE

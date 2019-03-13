@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -e
+
+if [ "$#" != "1" ]; then
+    echo ""
+    echo "WARN : NO ARGUMENTS FOUND."
+    echo ""
+    echo "syntax:"
+    echo "========================================="
+    echo "$(basename $0) [remote server]"
+    echo ""
+    echo "examples:"
+    echo "$(basename $0) stl6"
+    echo ""
+    exit 0;
+fi
+REMOTE_SERVER="$1"
+
+eval "sleep 1 && open http://localhost:10000" &
+ssh -L10000:localhost:10000 -L5433:localhost:5432 -L10080:localhost:80 $REMOTE_SERVER
+

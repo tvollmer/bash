@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# multiple files to be executed
+
+
+for ARG in "$@"; do
+
+  mkdir -p $ARG/src/{main,test}/{java,resources,groovy}
+  touch $ARG/src/{main,test}/{java,resources,groovy}/PLACEHOLDER.txt
+
+done;
+

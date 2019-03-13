@@ -1,0 +1,7 @@
+#!/bin/bash
+ 
+# MaxPermSize prevents PermGen OutOfMemory errors running jetty (adjustment service)
+# Making jrebel always run slows down most maven builds that dont need it
+# Might need to use mvnDebug to allow for attaching a debugger
+REBEL_HOME=/usr/local/jrebel/current
+MAVEN_OPTS="-javaagent:$REBEL_HOME/jrebel.jar -XX:MaxPermSize=256m" mvn jetty:run -Drebel.root=/opt/projects

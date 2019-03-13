@@ -1,0 +1,13 @@
+#!/bin/bash
+
+SVN_URL="https://svn.suddenlink.cequel3.com"
+
+for REPO in "$@"; do
+ echo ""
+ echo "$REPO : "
+ svn ls $SVN_URL/$REPO | while read MODULE; do
+  #echo $REPO/$MODULE
+  echo $MODULE | sed 's/\///g'
+ done;
+
+done;

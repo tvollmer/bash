@@ -1,0 +1,98 @@
+#!/bin/bash
+
+set -e
+
+
+SERVER="$1"
+if [ "$SERVER" == "" ]; then
+    echo ""
+    echo "WARN : NO ARGUMENTS FOUND."
+    echo ""
+    echo "syntax:"
+    echo "========================================="
+    echo "$(basename $0) [ssh server name]"
+    echo ""
+    echo "examples :"
+    echo "$(basename $0) sshConfigAlias"
+    echo "$(basename $0) serverName"
+    echo ""
+    exit 0;
+fi;
+
+cd ~
+FILE_NAME="id_rsa.pub"
+PUB_KEY_FILE=".ssh/$FILE_NAME"
+#if [ ! -f $PUB_KEY_FILE ]; then
+if [ ! -f .ssh/id_rsa.pub ]; then
+    echo ""
+    echo "WARN : SSH PUB KEY FILE NOT FOUND."
+    echo ""
+    echo "was looking for:"
+    echo "========================================="
+    echo "$PUB_KEY_FILE"
+    echo ""
+    exit 0;
+fi;
+
+read -s -p "Please enter your ssh password: " PASSWORD
+echo ""
+
+exp_scp () {
+FILE="$1"
+expect -c "
+spawn scp "$FILE" "$SERVER":~/
+expect {
+  \"*?assword:*\" { 
+        send \"$PASSWORD\r\"
+        interact 
+  } \"*?yes/no)*\" { 
+        send \"yes\r\"
+        exp_continue 
+  } eof { 
+        exit 
+  }
+}
+exit
+"
+}
+
+exp_exec () {
+CMD="$1"
+expect -c "
+spawn ssh $SERVER $CMD
+expect {
+  \"*?assword:*\" {
+        send \"$PASSWORD\r\"
+        interact 
+  } \"*?yes/no)*\" { 
+        send \"yes\r\"
+        exp_continue 
+  } eof { 
+        exit 
+  }
+}
+exit
+"
+}
+
+echo ""
+echo "about to scp your public key file ..."
+exp_scp "$PUB_KEY_FILE"
+
+echo ""
+echo "creating a .ssh folder, adding .ssh/authorized_keys (if it doesn't already exist), and applying perms ..."
+exp_exec "\"if \[ ! -d .ssh \]; then mkdir .ssh; fi;\""
+exp_exec "\"chmod 0700 .ssh && touch .ssh/authorized_keys && chmod 0600 .ssh/authorized_keys\""
+
+echo ""
+echo "appending authorized_keys (if it doesn't already exist) ..."
+exp_exec "\"if \[ \\\"\\\$(grep -f $FILE_NAME .ssh/authorized_keys)\\\" == \\\"\\\" \]; then cat $FILE_NAME >> .ssh/authorized_keys; fi\""
+
+echo ""
+echo "removing your public key file ..."
+exp_exec "\"rm $FILE_NAME\"" # always remove
+
+echo ""
+echo "done."
+echo ""
+
